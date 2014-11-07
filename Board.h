@@ -1,9 +1,13 @@
+#ifndef BOARD_H
+#define BOARD_H
+
 #include<iostream>
 using namespace std;
 
 class Board {
 public:
 	char board[3][3];
+	char currentPlayer;
 	int nodeCount;
 
 	void buildBoard(char* input);
@@ -11,6 +15,8 @@ public:
 	void printBoard();
 
 	char checkWin();
+
+	void setCurrentPlayer();
 
 };
 
@@ -35,6 +41,7 @@ void Board::printBoard() {
 }
 
 void Board::buildBoard(char* input) {
+	nodeCount = 0;
 	board[0][0] = input[0];
 	board[0][1] = input[1];
 	board[0][2] = input[2];
@@ -63,13 +70,14 @@ char Board::checkWin() {
 	}
 	//vertical
 	for (i = 0; i<3; i++) {
-		for (j = 0; j<3; j++) {
+		for (j = 0; j < 3; j++) {
 			if (j == 0) player = board[j][i];
 			if (board[j][i] != player) player = '_';
-			if (player != '_') {
-				return player;
-			}
 		}
+		if (player != '_') {
+			return player;
+		}
+		
 	}
 	//diagonal 1
 	if (board[0][0] != '_') {
@@ -91,5 +99,40 @@ char Board::checkWin() {
 			return player;
 		}
 	}
+
+	player = 'D';
+	for (i = 0; i<3; i++) {
+		for (j = 0; j<3; j++) {
+			
+			if (board[i][j] == '_') {
+				player = '_';
+			}
+		}
+	}
+
 	return player;
 }
+
+void Board::setCurrentPlayer() {
+	int i, j;
+	int X = 0;
+	int O = 0;
+	//horizontal
+	for (i = 0; i < 3; i++) {
+		for (j = 0; j < 3; j++) {
+			if (board[i][j] == 'X') X++;
+			else if (board[i][j] == 'O') O++;
+			else if (board[i][j] != '_') {
+				currentPlayer = 'E';
+				return;
+			}
+		}
+	}
+
+	if (X == O) currentPlayer = 'X';
+	else if ((X - O) == 1) currentPlayer = 'O';
+	else currentPlayer = 'E';
+
+}
+
+#endif
