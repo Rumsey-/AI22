@@ -100,8 +100,8 @@ int minimax(Board &mainBoard) {
 	}
 
 	if (mainBoard.currentPlayer == 'X') {
+		bestScore = -2; //-2 is even worse than O winning, so must find a better score than this
 		while (rulesList.size() != 0) {
-			bestScore = -2; //-2 is even worse than O winning, so must find a better score than this
 			Rule currentRule = rulesList.front();
 			currentRule.applyRule(mainBoard);
 			score = minimax(mainBoard);
@@ -113,8 +113,8 @@ int minimax(Board &mainBoard) {
 	}
 
 	else if (mainBoard.currentPlayer == 'O') {
+		bestScore = 2; //2 is worse than X winning, so O can find a better move than this
 		while (rulesList.size() != 0){
-			bestScore = 2; //2 is worse than X winning, so O can find a better move than this
 			Rule currentRule = rulesList.front();
 			currentRule.applyRule(mainBoard);
 			score = minimax(mainBoard);
@@ -123,6 +123,63 @@ int minimax(Board &mainBoard) {
 			rulesList.pop_front();
 		}
 		return bestScore;
+	}
+
+
+}
+
+int alphabeta(Board &mainBoard, int &alpha, int &beta) {
+
+	char player = mainBoard.checkWin();
+	if (player != '_') return score(player);
+
+	int score;
+	int i, j;
+	list<Rule> rulesList;
+	for (i = 0; i<3; i++) {
+		for (j = 0; j<3; j++) {
+			if (mainBoard.board[i][j] == '_') {
+				Rule newRule;
+				newRule.i = i;
+				newRule.j = j;
+				newRule.player = mainBoard.currentPlayer;
+				rulesList.push_back(newRule);
+			}
+		}
+	}
+
+	if (mainBoard.currentPlayer == 'X') {
+		while (rulesList.size() != 0) {
+			Rule currentRule = rulesList.front();
+			currentRule.applyRule(mainBoard);
+			score = alphabeta(mainBoard, alpha, beta);
+			if (score>alpha) alpha = score;
+			if (alpha >= beta) {
+				currentRule.undoRule(mainBoard);
+				mainBoard.alphaCuts++;
+				return alpha; //alpha cut off
+			}
+			currentRule.undoRule(mainBoard);
+			rulesList.pop_front();
+		}
+		return alpha;
+	}
+
+	else if (mainBoard.currentPlayer == 'O') {
+		while (rulesList.size() != 0){
+			Rule currentRule = rulesList.front();
+			currentRule.applyRule(mainBoard);
+			score = alphabeta(mainBoard, alpha, beta);
+			if (score < beta) beta = score;
+			if (alpha >= beta) {
+				currentRule.undoRule(mainBoard);
+				mainBoard.betaCuts++;
+				return beta; //beta cut off
+			}
+			currentRule.undoRule(mainBoard);
+			rulesList.pop_front();
+		}
+		return beta;
 	}
 
 
@@ -162,6 +219,13 @@ int main(int argc, char* argv[])
 	int score = minimax(mainBoard);
 	cout << "Game Result: " << score << endl;
 	cout << "Moves considered without alpha-beta pruning: " << mainBoard.nodeCount << endl;
+	mainBoard.nodeCount = 0; //reset the node counter
+
+	int alpha = -2; int beta = 2;
+	score = alphabeta(mainBoard, alpha, beta);
+
+	cout << "Game Result: " << score << endl;
+	cout << "Moves considered with alpha-beta pruning: " << mainBoard.nodeCount << endl;
 
 	return 0;
 

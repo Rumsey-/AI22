@@ -9,6 +9,7 @@ public:
 	char board[3][3];
 	char currentPlayer;
 	int nodeCount;
+	int alphaCuts, betaCuts;
 
 	void buildBoard(char* input);
 
